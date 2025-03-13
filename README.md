@@ -1,1 +1,1 @@
-# myproject_api
+# 변경중 (accounts 앱만 완성)
