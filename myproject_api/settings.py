@@ -36,10 +36,19 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist', #블랙리스트
-    
+
     #커스텀 앱
     'accounts',
+    'board',
 ]
+
+ASGI_APPLICATION = "myproject_api.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",  # Redis 사용 시 redis 설정 필요
+    },
+}
 
 # DRF 설정
 REST_FRAMEWORK = {
