@@ -1,16 +1,19 @@
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
-from .models import Post,Like,Bookmark
-from .serializers import PostSerializer,LikeSerializer,BookmarkSerializer,CommentSerializer
+from rest_framework.parsers import MultiPartParser, FormParser,JSONParser
+from .models import Post,Like,Bookmark,PostImage
+from .serializers import PostSerializer,LikeSerializer,BookmarkSerializer,CommentSerializer,PostSerializer, PostImageSerializer
 from django.core.exceptions import PermissionDenied
+from django_filters.rest_framework import DjangoFilterBackend
 
 #목록 조회 ,게시글 작성
 class PostListCreateView(generics.ListCreateAPIView):
     queryset = Post.objects.all().order_by('-created_at')
     serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    filter_backends = ['title','content'] 
+    permission_classes = [permissions.AllowAny]
+    parser_classes = [JSONParser,MultiPartParser, FormParser]
+    filter_backends = [DjangoFilterBackend]
     search_fields = ['title', 'content'] #검색 가능 필드
     ordering_fields = ['created_at'] #정렬 가능 필드
 
@@ -23,7 +26,10 @@ class PostListCreateView(generics.ListCreateAPIView):
         return queryset
     
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        post = serializer.save(author=self.request.user)
+        images = self.request.FILES.getlist('images')  # 여러 이미지 업로드 지원
+        for image in images:
+            PostImage.objects.create(post=post, image=image)
 
 # 좋아요 API
 @api_view(['POST'])
@@ -123,3 +129,26 @@ def comment_delete(request, comment_id):
         return Response({"message": "댓글이 삭제되었습니다."}, status=200)
     else:
         raise PermissionDenied("댓글을 삭제할 수 없습니다.")
+    
+# 여러 개의 이미지 삭제 API
+@api_view(['DELETE'])
+@permission_classes([permissions.IsAuthenticated])
+def delete_multiple_post_images(request, post_id):
+    post = generics.get_object_or_404(Post, id=post_id)
+
+    # 게시글 작성자만 이미지 삭제 가능
+    if request.user != post.author:
+        raise PermissionDenied("게시글의 이미지를 삭제할 수 없습니다.")
+
+    image_ids = request.data.get('image_ids', [])  # 삭제할 이미지 ID 리스트 받기
+
+    if not image_ids:
+        return Response({"error": "삭제할 이미지 ID 목록을 제공해야 합니다."}, status=400)
+
+    images_to_delete = PostImage.objects.filter(id__in=image_ids, post=post)
+
+    if images_to_delete.exists():
+        images_to_delete.delete()
+        return Response({"message": "선택한 이미지가 삭제되었습니다."}, status=200)
+    else:
+        return Response({"error": "해당 이미지가 존재하지 않거나 삭제할 수 없습니다."}, status=404)

@@ -32,10 +32,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
 
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist', #블랙리스트
+
+    'drf_spectacular',
+    'drf_spectacular_sidecar',
+    'corsheaders',
 
     #커스텀 앱
     'accounts',
@@ -52,9 +57,13 @@ CHANNEL_LAYERS = {
 
 # DRF 설정
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+        'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
 }
 
 # JWT 설정 (만료 시간 변경 가능)
@@ -72,6 +81,7 @@ SIMPLE_JWT = {
 }
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -80,6 +90,14 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  #  Next.js 로컬 개발 환경
+    "http://192.168.0.103:3000",  #  같은 네트워크에서 접근 가능하도록 설정
+]
+
+CORS_ALLOW_CREDENTIALS = True  #  로그인 세션 유지 (JWT 포함)
+CORS_ALLOW_ALL_ORIGINS = True  # ✅ 모든 출처 허용 (테스트용)
 
 ROOT_URLCONF = 'myproject_api.urls'
 
