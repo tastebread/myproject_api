@@ -8,7 +8,17 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ['id', 'post', 'author', 'author_name', 'content', 'created_at']
-        read_only_fields = ['id', 'author', 'created_at']
+        read_only_fields = ['id', 'author', 'created_at', 'post']
+
+    def create(self, validated_data):
+        request = self.context["request"]
+        post_id = self.context.get("post_id")
+        post = Post.objects.get(id=post_id)
+        validated_data["post"] = post
+        return super().create(validated_data)
+    
+    def get_author(self, obj):
+        return obj.author.username # 작성자의 username 반환
 
 #여러 이미지
 class PostImageSerializer(serializers.ModelSerializer):
