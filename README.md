@@ -38,6 +38,8 @@ MyProject는 **Django REST Framework(DRF)와 Next.js를 기반으로 한 게시�
 - Docker + Gunicorn (배포 시 사용)
 
 ###  **프론트엔드 (Next.js + TypeScript)**
+### https://github.com/tastebread/myproject_frontend   
+
 - Next.js (App Router)
 - TypeScript
 - Tailwind CSS
