@@ -46,7 +46,7 @@ def like_post(request, post_id):
     else:
         like.delete()
         return Response({"message": "게시글 좋아요를 취소했습니다."}, status=200)
-    ###
+    ######
 #댓글 좋아요 API
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
