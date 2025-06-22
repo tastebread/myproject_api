@@ -8,7 +8,7 @@ from .views import (
     comment_delete,delete_multiple_post_images,my_posts,my_comments,my_liked_posts,my_liked_comments,
     my_bookmarked_posts,my_profile
 )
-###
+
 urlpatterns = [
     path('posts/', PostListCreateView.as_view(), name='post-list-create'),
     path('posts/<int:pk>/', PostDetailView.as_view(), name='post-detail'),
